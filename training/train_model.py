@@ -138,15 +138,28 @@ def main():
     # Save model
     # ======================================================
 
+   # ======================================================
+    # Save model
+    # ======================================================
+
     joblib.dump(
         model,
         MODEL_PATH,
     )
 
-    encoder.save(
+    # ======================================================
+    # Save only sklearn LabelEncoder.
+    # Do NOT save custom DatasetEncoder object because it
+    # requires importing the custom class when loading.
+    # ======================================================
+
+    joblib.dump(
+        {
+            "risk_encoder": encoder.risk_encoder,
+        },
         ENCODER_PATH,
     )
-
+    
     print()
 
     print("=" * 60)
