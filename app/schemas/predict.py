@@ -40,7 +40,7 @@ class PredictDelayRequest(BaseModel):
 
     assignee_count: int = Field(
         ...,
-        ge=1,
+        ge=0,
         description="Number of task assignees",
     )
 
