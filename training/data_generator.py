@@ -69,18 +69,83 @@ def generate_task_complexity(estimate_time: int):
 # Assignee Count
 # ==========================================================
 
-def generate_assignee_count(complexity: TaskComplexity):
+def generate_assignee_count(
+    priority: Priority,
+    complexity: TaskComplexity,
+) -> int:
+    """
+    Sinh số lượng người thực hiện task.
+
+    Ý tưởng:
+    - Task đơn giản đa số chỉ cần 1 người.
+    - Task khó thường có nhiều người hơn.
+    - Tuy nhiên trong nhóm nhỏ vẫn có khả năng
+      chỉ 1 người làm task khó.
+    - Priority cao làm tăng xác suất có thêm người.
+    """
+
+    # ===============================
+    # Base theo độ phức tạp
+    # ===============================
 
     if complexity == TaskComplexity.EASY:
-        return 1
+        weights = {
+            1: 90,
+            2: 10,
+        }
 
-    if complexity == TaskComplexity.MEDIUM:
-        return random.randint(1, 2)
+    elif complexity == TaskComplexity.MEDIUM:
+        weights = {
+            1: 65,
+            2: 30,
+            3: 5,
+        }
 
-    if complexity == TaskComplexity.HARD:
-        return random.randint(2, 3)
+    elif complexity == TaskComplexity.HARD:
+        weights = {
+            1: 40,
+            2: 40,
+            3: 20,
+        }
 
-    return random.randint(3, 5)
+    else:  # VERY_HARD
+        weights = {
+            1: 20,
+            2: 40,
+            3: 30,
+            4: 10,
+        }
+
+    # ===============================
+    # Điều chỉnh theo Priority
+    # ===============================
+
+    if priority == Priority.HIGH:
+
+        if 1 in weights:
+            weights[1] -= 10
+
+        weights[2] = weights.get(2, 0) + 8
+        weights[3] = weights.get(3, 0) + 2
+
+    elif priority == Priority.URGENT:
+
+        if 1 in weights:
+            weights[1] -= 20
+
+        weights[2] = weights.get(2, 0) + 12
+        weights[3] = weights.get(3, 0) + 6
+        weights[4] = weights.get(4, 0) + 2
+
+    # Chuẩn hóa tránh số âm
+    for key in weights:
+        weights[key] = max(weights[key], 0)
+
+    return random.choices(
+        population=list(weights.keys()),
+        weights=list(weights.values()),
+        k=1,
+    )[0]
 
 
 # ==========================================================

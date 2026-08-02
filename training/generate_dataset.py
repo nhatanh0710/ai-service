@@ -67,7 +67,8 @@ def main():
             )
 
             assignee_count = generate_assignee_count(
-                complexity
+                priority,
+                complexity,
             )
 
             workload = generate_average_workload(

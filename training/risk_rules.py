@@ -58,9 +58,9 @@ def calculate_risk_score(
     if remaining_days <= 1:
         score += 30
     elif remaining_days <= 3:
-        score += 18
+        score += 25
     elif remaining_days <= 7:
-        score += 8
+        score += 12
 
     # ==========================================================
     # Actual Time / Estimate Time
@@ -114,18 +114,26 @@ def calculate_risk_score(
 
     # Deadline rất gần nhưng tiến độ rất thấp
     if remaining_days <= 2 and current_progress < 40:
-        score += 12
+        score += 15
 
     # Đã vượt estimate nhưng tiến độ vẫn thấp
-    if actual_time > estimate_time and current_progress < 70:
+    if actual_time > estimate_time and current_progress < 60:
         score += 10
 
     # Task rất khó nhưng chỉ có 1 người làm
-    if (
-        task_complexity == TaskComplexity.VERY_HARD
-        and assignee_count == 1
-    ):
-        score += 8
+    if assignee_count == 1:
+
+        if task_complexity == TaskComplexity.HARD:
+            score += 8
+
+        elif task_complexity == TaskComplexity.VERY_HARD:
+            score += 15
+
+        if priority == Priority.HIGH:
+            score += 5
+
+        elif priority == Priority.URGENT:
+            score += 10
 
     # Workload rất cao và tiến độ thấp
     if average_workload >= 10 and current_progress < 50:
@@ -138,6 +146,20 @@ def calculate_risk_score(
     # Tiến độ tốt và workload thấp
     if current_progress >= 80 and average_workload <= 5:
         score -= 8
+
+
+    remaining_work = estimate_time - actual_time
+    available_work = remaining_days * assignee_count * 8
+
+    if available_work > 0:
+        pressure = remaining_work / available_work
+
+        if pressure >= 2:
+            score += 35
+        elif pressure >= 1.5:
+            score += 25
+        elif pressure >= 1:
+            score += 15
 
     # Giới hạn điểm từ 0 - 100
     score = max(0, min(score, 100))
